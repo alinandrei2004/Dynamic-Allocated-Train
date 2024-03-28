@@ -3,7 +3,7 @@
 #include <string.h>
 
 typedef struct node {
-    char c;
+    char character;
     struct node *next, *prev;
 } Node, *TList;
 
@@ -33,7 +33,7 @@ void initTrain(List *t) {
     t->wagon->next = t->sentinel;
     t->wagon->prev = t->sentinel;
     t->mechanic = t->wagon;
-    t->wagon->c = '#';
+    t->wagon->character = '#';
     t->len = 1;
 }
 
@@ -48,6 +48,47 @@ void initQueue(Queue *q) {
     q->first->prev = NULL;
     q->last->next = NULL;
     q->last->prev = q->first;
+}
+
+void write(TList *mechanic, char c) {
+    (*mechanic)->character = c;
+}
+
+void push(Queue *q, char s[]) {
+    QNode *new_instr = (QNode*) malloc(sizeof(QNode));
+    strcpy(new_instr->ins, s);
+    q->last->prev->next = new_instr;
+    new_instr->prev = q->last->prev;
+    q->last->prev = new_instr;
+    new_instr->next = q->last;
+}
+
+void pop(Queue *q, TList *mechanic) {
+    QNode *aux = q->first->next;
+    q->first->next = aux->next;
+    aux->next->prev = q->first;
+    if(strstr(aux->ins, "WRITE")) {
+        write(mechanic, aux->ins[6]);
+    }
+    free(aux);
+}
+
+void show_current(List t, FILE *out) {
+    fprintf(out,"%c", t.mechanic->character);
+}
+
+void show(List t, FILE *out) {
+    TList p;
+    for(p = t.wagon; p != t.sentinel; p = p->next) {
+        if(p == t.mechanic) {
+            fprintf(out, "|");
+            fprintf(out, "%c", p->character);
+            fprintf(out, "|");
+        }
+        else {
+            fprintf(out, "%c", p->character);
+        }
+    }
 }
 
 int main(){
@@ -69,18 +110,20 @@ int main(){
     for(i = 0; i < nr_instr; i++) {
         fgets(instr, 30, f);
         if(strstr(instr, "MOVE") || strstr(instr, "WRITE") || strstr(instr, "CLEAR") || strstr(instr, "INSERT")) {
-            QNode *new_instr = (QNode*) malloc(sizeof(QNode));
-            q.last->prev->next = new_instr;
-            new_instr->prev = q.last->prev;
-            q.last->prev = new_instr;
-            new_instr->next = q.last;
-            strcpy(new_instr->ins, instr);
+            push(&q, instr);
+            //printf(out, "%s", q.first->next->ins);   
         }
+        else if(strcmp(instr, "SHOW") == 0) {
+            show(train, out);
+        }
+            else if(strcmp(instr, "SHOW-CURRENT") == 0) {
+                show_current(train, out);
+            }
+                else if(strstr(instr, "EXECUTE")) {
+                    pop(&q, &train.mechanic);
+                }
+        // printf("%s", q.first->next->ins);
     }
-    QNode *current = q.first->next;
-    // for (current; current->next != NULL; current = current->next) {
-    //     fprintf(out, "%s", current->ins);
-    // }
     fclose(f);
     fclose(out);
     return 0;
