@@ -77,8 +77,10 @@ void moveLeft(List *t) {
 }
 
 void clearCell(List *t) {
-    if(t->mechanic == t->wagon) {
-        // t->mechanic->character = '#';
+    if(t->mechanic->prev == t->sentinel && t->mechanic->next == t->sentinel) {
+        t->mechanic->character = '#';
+    }
+    else if(t->mechanic == t->wagon && t->mechanic->next != t->sentinel) {
         TList aux = t->mechanic;
         t->mechanic->prev->next = t->mechanic->next;
         t->mechanic->next->prev = t->mechanic->prev;
@@ -86,10 +88,48 @@ void clearCell(List *t) {
         t->wagon = t->sentinel->next;
         free(aux);
     }
-    // caz vagon unic in tren
-    // caz vagon oarecare
+        else {
+            TList aux = t->mechanic;
+            t->mechanic->prev->next = t->mechanic->next;
+            t->mechanic->next->prev = t->mechanic->prev;
+            t->mechanic = t->mechanic->prev;
+            free(aux);
+        }
+}
+
+void clearAll(List *t) {
+    TList p = t->wagon->next;
+    for(p; p != t->sentinel; p = p->next) {
+        free(p->prev);
+    }
+    free(p);
+    t->wagon->next = t->sentinel;
+    t->mechanic = t->wagon;
+    t->wagon->character = '#';
+}
+
+void insertRight(List *t, char c) {
+    TList new_wagon = (TList) malloc(sizeof(Node));
+    new_wagon->character = c;
+    new_wagon->next = t->mechanic->next;
+    new_wagon->prev = t->mechanic;
+    t->mechanic->next->prev = new_wagon;
+    t->mechanic->next = new_wagon;
+    t->mechanic = t->mechanic->next;
+}
+
+void insertLeft(List *t, char c, FILE *out) {
+    TList new_wagon = (TList) malloc(sizeof(Node));
+    new_wagon->character = c;
+    if(t->mechanic == t->wagon) {
+        fprintf(out, "ERROR\n");
+    }
     else {
-        
+        new_wagon->next = t->mechanic;
+        new_wagon->prev = t->mechanic->prev;
+        t->mechanic->prev->next = new_wagon;
+        t->mechanic->prev = new_wagon;
+        t->mechanic = t->mechanic->prev;
     }
 }
 
@@ -102,12 +142,14 @@ void push(Queue *q, char s[]) {
     new_instr->next = q->last;
 }
 
-void pop(Queue *q, List *train) {
+void pop(Queue *q, List *train, FILE *out) {
+    char c;
     QNode *aux = q->first->next;
     q->first->next = aux->next;
     aux->next->prev = q->first;
     if(strstr(aux->ins, "WRITE")) {
-        write(&(*train).mechanic, aux->ins[6]);
+        c = (strchr(aux->ins, ' ') + 1)[0];
+        write(&(*train).mechanic, c);
     }
     else if(strstr(aux->ins, "MOVE_RIGHT")) {
         moveRight(&(*train));
@@ -118,6 +160,17 @@ void pop(Queue *q, List *train) {
             else if(strstr(aux->ins, "CLEAR_CELL")) {
                 clearCell(&(*train));
             }
+                else if(strstr(aux->ins, "CLEAR_ALL")) {
+                    clearAll(&(*train));
+                }
+                    else if(strstr(aux->ins, "INSERT_RIGHT")) {
+                        c = (strchr(aux->ins, ' ') + 1)[0];
+                        insertRight(&(*train), c);
+                    }
+                        else if(strstr(aux->ins, "INSERT_LEFT")) {
+                            c = (strchr(aux->ins, ' ') + 1)[0];
+                            insertLeft(&(*train), c, out);
+                        }
     free(aux);
 }
 
@@ -168,7 +221,7 @@ int main(){
                 show_current(train, out);
             }
                 else if(strstr(instr, "EXECUTE")) {
-                    pop(&q, &train);
+                    pop(&q, &train, out);
                 }
     }
     // moveRight(&train);
