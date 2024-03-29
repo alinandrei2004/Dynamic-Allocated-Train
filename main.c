@@ -9,7 +9,6 @@ typedef struct node {
 
 typedef struct {
     TList sentinel, wagon, mechanic;
-    int len;
 } List;
 
 typedef struct queueNode {
@@ -34,7 +33,6 @@ void initTrain(List *t) {
     t->wagon->prev = t->sentinel;
     t->mechanic = t->wagon;
     t->wagon->character = '#';
-    t->len = 1;
 }
 
 void initQueue(Queue *q) {
@@ -54,6 +52,47 @@ void write(TList *mechanic, char c) {
     (*mechanic)->character = c;
 }
 
+void moveRight(List *t) {
+    if(t->mechanic->next == t->sentinel) {
+        TList new = (TList) malloc(sizeof(Node));
+        new->next = t->sentinel;
+        new->prev = t->mechanic;
+        t->mechanic->next = new;
+        t->sentinel->prev = new;
+        t->mechanic = new;
+        t->mechanic->character = '#';
+    }
+    else {
+        t->mechanic = t->mechanic->next;
+    }
+}
+
+void moveLeft(List *t) {
+    if(t->mechanic->prev == t->sentinel) {
+        t->mechanic = t->sentinel->prev;
+    }
+    else {
+        t->mechanic = t->mechanic->prev;
+    }
+}
+
+void clearCell(List *t) {
+    if(t->mechanic == t->wagon) {
+        // t->mechanic->character = '#';
+        TList aux = t->mechanic;
+        t->mechanic->prev->next = t->mechanic->next;
+        t->mechanic->next->prev = t->mechanic->prev;
+        t->mechanic = t->sentinel->prev;
+        t->wagon = t->sentinel->next;
+        free(aux);
+    }
+    // caz vagon unic in tren
+    // caz vagon oarecare
+    else {
+        
+    }
+}
+
 void push(Queue *q, char s[]) {
     QNode *new_instr = (QNode*) malloc(sizeof(QNode));
     strcpy(new_instr->ins, s);
@@ -63,13 +102,22 @@ void push(Queue *q, char s[]) {
     new_instr->next = q->last;
 }
 
-void pop(Queue *q, TList *mechanic) {
+void pop(Queue *q, List *train) {
     QNode *aux = q->first->next;
     q->first->next = aux->next;
     aux->next->prev = q->first;
     if(strstr(aux->ins, "WRITE")) {
-        write(mechanic, aux->ins[6]);
+        write(&(*train).mechanic, aux->ins[6]);
     }
+    else if(strstr(aux->ins, "MOVE_RIGHT")) {
+        moveRight(&(*train));
+    }
+        else if(strstr(aux->ins, "MOVE_LEFT")) {
+            moveLeft(&(*train));
+        }
+            else if(strstr(aux->ins, "CLEAR_CELL")) {
+                clearCell(&(*train));
+            }
     free(aux);
 }
 
@@ -120,10 +168,10 @@ int main(){
                 show_current(train, out);
             }
                 else if(strstr(instr, "EXECUTE")) {
-                    pop(&q, &train.mechanic);
+                    pop(&q, &train);
                 }
-        // printf("%s", q.first->next->ins);
     }
+    // moveRight(&train);
     fclose(f);
     fclose(out);
     return 0;
