@@ -133,6 +133,59 @@ void insertLeft(List *t, char c, FILE *out) {
     }
 }
 
+void search(List *t, char word[50], FILE *out) {
+    char aux[50], s[50];
+    int k = 1, ok = 0, i, found = 0;
+    aux[0] = t->mechanic->character;
+    if(aux[0] == word[0]) {
+        ok = 1;
+    }
+    if(ok == 0) {
+        k = 0;
+        strcpy(aux, "");
+    }
+    if(strcmp(aux, word) == 0) {
+        found = 1;
+    }
+    TList p;
+    for(p = t->mechanic->next; p != t->mechanic && found == 0; p = p->next) {
+        if(p == t->sentinel) {
+            p = t->wagon;
+        }
+        aux[k++] = p->character;
+        aux[k] = '\0';
+        if(strcmp(aux, word) == 0) {
+            found = 1;
+        }
+        else if(aux[k - 1] != word[k - 1]) {
+            ok = 0;
+            for (i = 0; i < k && ok == 0; i++) {
+                if(strcmp(strstr(word, aux + i), word) == 0) {
+                    ok = 1;
+                    if (aux[i] != '\0') {
+                        if (strlen(aux) >= i) {
+                            strcpy(s, aux + i);
+                            strcpy(aux, s);
+                        }
+                    }
+                }
+            }
+            if(!ok) {
+                k = 0;
+                strcpy(aux, "");
+            }
+        }
+    }
+    if(found) {
+        for (i = 0; i < k; i++) {
+            moveRight(&(*t));
+        }
+    }
+    else {
+        fprintf(out, "ERROR\n");
+    }
+}
+
 void push(Queue *q, char s[]) {
     QNode *new_instr = (QNode*) malloc(sizeof(QNode));
     strcpy(new_instr->ins, s);
@@ -143,7 +196,7 @@ void push(Queue *q, char s[]) {
 }
 
 void pop(Queue *q, List *train, FILE *out) {
-    char c;
+    char c, word[50];
     QNode *aux = q->first->next;
     q->first->next = aux->next;
     aux->next->prev = q->first;
@@ -171,6 +224,10 @@ void pop(Queue *q, List *train, FILE *out) {
                             c = (strchr(aux->ins, ' ') + 1)[0];
                             insertLeft(&(*train), c, out);
                         }
+                            else if(strstr(aux->ins, "SEARCH ")) {
+                                strcpy(word, strchr(aux->ins, ' ') + 1);
+                                search(&(*train), word, out);
+                            }
     free(aux);
 }
 
@@ -190,6 +247,7 @@ void show(List t, FILE *out) {
             fprintf(out, "%c", p->character);
         }
     }
+    fprintf(out, "\n");
 }
 
 int main(){
@@ -210,7 +268,10 @@ int main(){
     fgetc(f);
     for(i = 0; i < nr_instr; i++) {
         fgets(instr, 30, f);
-        if(strstr(instr, "MOVE") || strstr(instr, "WRITE") || strstr(instr, "CLEAR") || strstr(instr, "INSERT")) {
+        if(instr[strlen(instr) - 1] == '\n') {
+            instr[strlen(instr) - 1] = '\0';
+        }
+        if(strstr(instr, "MOVE") || strstr(instr, "WRITE") || strstr(instr, "CLEAR") || strstr(instr, "INSERT") || strstr(instr, "SEARCH")) {
             push(&q, instr);
             //printf(out, "%s", q.first->next->ins);   
         }
