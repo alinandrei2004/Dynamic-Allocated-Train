@@ -298,6 +298,21 @@ void searchLeft(List *t, char word[], FILE *out) {
     }
 }
 
+void switchQueue(Queue *q) {
+    QNode *aux = q->first;
+    q->first = q->last;
+    q->last = aux;
+    q->first->next = q->first->prev;
+    q->first->prev = NULL;
+    q->last->prev = q->last->next;
+    q->last->next = NULL;
+    for(aux = q->first->next; aux != q->last; aux = aux->next) {
+        QNode *aux2 = aux->next;
+        aux->next = aux->prev;
+        aux->prev = aux2;
+    }
+}
+
 void push(Queue *q, char s[]) {
     QNode *new_instr = (QNode*) malloc(sizeof(QNode));
     strcpy(new_instr->ins, s);
@@ -405,6 +420,9 @@ int main(){
                 else if(strstr(instr, "EXECUTE")) {
                     pop(&q, &train, out);
                 }
+                    else if(strcmp(instr, "SWITCH") == 0) {
+                        switchQueue(&q);
+                    }
     }
     // moveRight(&train);
     fclose(f);
