@@ -133,7 +133,7 @@ void insertLeft(List *t, char c, FILE *out) {
     }
 }
 
-void search(List *t, char word[50], FILE *out) {
+void search(List *t, char word[], FILE *out) {
     char aux[50], s[50];
     int k = 1, ok = 0, i, found = 0;
     aux[0] = t->mechanic->character;
@@ -160,13 +160,17 @@ void search(List *t, char word[50], FILE *out) {
         else if(aux[k - 1] != word[k - 1]) {
             ok = 0;
             for (i = 0; i < k && ok == 0; i++) {
-                if(strcmp(strstr(word, aux + i), word) == 0) {
-                    ok = 1;
-                    if (aux[i] != '\0') {
+                if(strstr(word, aux + i) != NULL) {
+                    if(strcmp(strstr(word, aux + i), word) == 0) {
+                        ok = 1;
                         if (strlen(aux) >= i) {
                             strcpy(s, aux + i);
                             strcpy(aux, s);
+                            k = k - i;
                         }
+                    }
+                    else {
+                        ok = 0;
                     }
                 }
             }
@@ -178,8 +182,116 @@ void search(List *t, char word[50], FILE *out) {
     }
     if(found) {
         for (i = 0; i < k; i++) {
-            moveRight(&(*t));
+            p = p->prev;
+            if(p == t->sentinel) {
+                p = t->sentinel->prev;
+            }
         }
+        t->mechanic = p;
+    }
+    else {
+        fprintf(out, "ERROR\n");
+    }
+}
+
+void searchRight(List *t, char word[], FILE *out) {
+    char aux[50], s[50];
+    int k = 1, ok = 0, i, found = 0;
+    aux[0] = t->mechanic->character;
+    if(aux[0] == word[0]) {
+        ok = 1;
+    }
+    if(ok == 0) {
+        k = 0;
+        strcpy(aux, "");
+    }
+    if(strcmp(aux, word) == 0) {
+        found = 1;
+    }
+    TList p;
+    for(p = t->mechanic->next; p != t->sentinel && found == 0; p = p->next) {
+        aux[k++] = p->character;
+        aux[k] = '\0';
+        if(strcmp(aux, word) == 0) {
+            found = 1;
+        }
+        else if(aux[k - 1] != word[k - 1]) {
+            ok = 0;
+            for (i = 0; i < k && ok == 0; i++) {
+                if(strstr(word, aux + i) != NULL) {
+                    if(strcmp(strstr(word, aux + i), word) == 0) {
+                        ok = 1;
+                        if (strlen(aux) >= i) {
+                            strcpy(s, aux + i);
+                            strcpy(aux, s);
+                            k = k - i;
+                        }
+                    }
+                    else {
+                        ok = 0;
+                    }
+                }
+            }
+            if(!ok) {
+                k = 0;
+                strcpy(aux, "");
+            }
+        }
+    }
+    if(found) {
+        t->mechanic = p->prev;
+    }
+    else {
+        fprintf(out, "ERROR\n");
+    }
+}
+
+void searchLeft(List *t, char word[], FILE *out) {
+    char aux[50], s[50];
+    int k = 1, ok = 0, i, found = 0;
+    aux[0] = t->mechanic->character;
+    if(aux[0] == word[0]) {
+        ok = 1;
+    }
+    if(ok == 0) {
+        k = 0;
+        strcpy(aux, "");
+    }
+    if(strcmp(aux, word) == 0) {
+        found = 1;
+    }
+    TList p;
+    for(p = t->mechanic->prev; p != t->sentinel && found == 0; p = p->prev) {
+        aux[k++] = p->character;
+        aux[k] = '\0';
+        if(strcmp(aux, word) == 0) {
+            found = 1;
+        }
+        else if(aux[k - 1] != word[k - 1]) {
+            ok = 0;
+            for (i = 0; i < k && ok == 0; i++) {
+                if(strstr(word, aux + i) != NULL) {
+                    if(strcmp(strstr(word, aux + i), word) == 0) {
+                        ok = 1;
+                        if (strlen(aux) >= i) {
+                            strcpy(s, aux + i);
+                            strcpy(aux, s);
+                            k = k - i;
+                        }
+                    }
+                    else {
+                        ok = 0;
+                    }
+                }
+            }
+            if(!ok) {
+                k = 0;
+                strcpy(aux, "");
+            }
+        }
+    }
+    if(found) {
+        t->mechanic = p->next;
     }
     else {
         fprintf(out, "ERROR\n");
@@ -226,8 +338,17 @@ void pop(Queue *q, List *train, FILE *out) {
                         }
                             else if(strstr(aux->ins, "SEARCH ")) {
                                 strcpy(word, strchr(aux->ins, ' ') + 1);
+                                // printf("%s\n", word);
                                 search(&(*train), word, out);
                             }
+                                else if(strstr(aux->ins, "SEARCH_RIGHT ")) {
+                                    strcpy(word, strchr(aux->ins, ' ') + 1);
+                                    searchRight(&(*train), word, out);
+                                }
+                                    else if(strstr(aux->ins, "SEARCH_LEFT ")) {
+                                        strcpy(word, strchr(aux->ins, ' ') + 1);
+                                        searchLeft(&(*train), word, out);
+                                    }
     free(aux);
 }
 
