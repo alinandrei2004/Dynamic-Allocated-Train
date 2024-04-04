@@ -195,7 +195,7 @@ void search(List *t, char word[], FILE *out) {
     }
     else {
         fprintf(out, "ERROR\n");
-    }
+    }    
 }
 
 void searchRight(List *t, char word[], FILE *out) {
@@ -391,6 +391,24 @@ void show(List t, FILE *out) {
     fprintf(out, "\n");
 }
 
+void freeMemory(List *t, Queue *q) {
+    TList current = t->sentinel->next;
+    while (current != t->sentinel) {
+        TList temp = current;
+        current = current->next;
+        free(temp);
+    }
+    free(t->sentinel);
+    QNode *currentQ = q->first->next;
+    while (currentQ != q->last) {
+        QNode *tempQ = currentQ;
+        currentQ = currentQ->next;
+        free(tempQ);
+    }
+    free(q->first);
+    free(q->last);
+}
+
 int main(){
     List train;
     Queue q;
@@ -434,6 +452,7 @@ int main(){
         
     }
     // moveRight(&train);
+    freeMemory(&train, &q);
     fclose(f);
     fclose(out);
     return 0;
