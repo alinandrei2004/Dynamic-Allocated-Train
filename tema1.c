@@ -49,8 +49,8 @@ void initQueue(Queue *q) {
     q->last->prev = q->first;
 }
 
-void write(TList *mechanic, char c) {
-    (*mechanic)->character = c;
+void write(List *t, char c) {
+    t->mechanic->character = c;
 }
 
 void moveRight(List *t) {
@@ -103,7 +103,6 @@ void clearAll(List *t) {
     for(p; p != t->sentinel; p = p->next) {
         free(p->prev);
     }
-    free(p);
     t->wagon->next = t->sentinel;
     t->mechanic = t->wagon;
     t->wagon->character = '#';
@@ -334,7 +333,7 @@ void pop(Queue *q, List *train, FILE *out) {
     aux->next->prev = q->first;
     if(strstr(aux->ins, "WRITE")) {
         c = (strchr(aux->ins, ' ') + 1)[0];
-        write(&(*train).mechanic, c);
+        write(&(*train), c);
     }
     else if(strstr(aux->ins, "MOVE_RIGHT")) {
         moveRight(&(*train));
