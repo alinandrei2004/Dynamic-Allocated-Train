@@ -32,6 +32,7 @@ void initTrain(List *t) {
     t->wagon->next = t->sentinel;
     t->wagon->prev = t->sentinel;
     t->mechanic = t->wagon;
+    // t->mechanic->character = '#';
     t->wagon->character = '#';
 }
 
@@ -134,23 +135,27 @@ void insertLeft(List *t, char c, FILE *out) {
 }
 
 void search(List *t, char word[], FILE *out) {
-    char aux[50], s[50];
+    char aux[100], s[100];
     int k = 1, ok = 0, i, found = 0;
     aux[0] = t->mechanic->character;
     if(aux[0] == word[0]) {
         ok = 1;
+        aux[1] = '\0';
     }
-    if(ok == 0) {
+    else if(strcmp(aux, word) == 0) {
+        found = 1;
+    }
+    else if(ok == 0) {
         k = 0;
         strcpy(aux, "");
-    }
-    if(strcmp(aux, word) == 0) {
-        found = 1;
     }
     TList p;
     for(p = t->mechanic->next; p != t->mechanic && found == 0; p = p->next) {
         if(p == t->sentinel) {
             p = t->wagon;
+            if(p == t->mechanic) {
+                break;
+            }
         }
         aux[k++] = p->character;
         aux[k] = '\0';
@@ -369,6 +374,7 @@ void pop(Queue *q, List *train, FILE *out) {
 
 void show_current(List t, FILE *out) {
     fprintf(out,"%c", t.mechanic->character);
+    fprintf(out, "\n");
 }
 
 void show(List t, FILE *out) {
@@ -391,7 +397,7 @@ int main(){
     Queue q;
     FILE *f, *out;
     int nr_instr, i;
-    char instr[30];
+    char instr[101];
     f = fopen("tema1.in", "r");
     out = fopen("tema1.out", "w");
     if(f == NULL || out == NULL) {
@@ -403,19 +409,21 @@ int main(){
     fscanf(f, "%d", &nr_instr);
     fgetc(f);
     for(i = 0; i < nr_instr; i++) {
-        fgets(instr, 30, f);
+        fgets(instr, 101, f);
         if(instr[strlen(instr) - 1] == '\n') {
             instr[strlen(instr) - 1] = '\0';
         }
+        // if(i >= 50) printf("%s\n", instr);
         if(strstr(instr, "MOVE") || strstr(instr, "WRITE") || strstr(instr, "CLEAR") || strstr(instr, "INSERT") || strstr(instr, "SEARCH")) {
             push(&q, instr);
-            //printf(out, "%s", q.first->next->ins);   
+            // printf("%s", q.first->next->ins);   
         }
         else if(strcmp(instr, "SHOW") == 0) {
             show(train, out);
         }
-            else if(strcmp(instr, "SHOW-CURRENT") == 0) {
+            else if(strcmp(instr, "SHOW_CURRENT") == 0) {
                 show_current(train, out);
+                // printf("%c", train.wagon->character);
             }
                 else if(strstr(instr, "EXECUTE")) {
                     pop(&q, &train, out);
@@ -423,6 +431,8 @@ int main(){
                     else if(strcmp(instr, "SWITCH") == 0) {
                         switchQueue(&q);
                     }
+        // show(train, out);
+        
     }
     // moveRight(&train);
     fclose(f);
