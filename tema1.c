@@ -139,18 +139,19 @@ void clearCell(List *t)
 }
 
 //functie pentru stergerea tuturor vagoanelor
+
 void clearAll(List *t)
 {
-    TList p;
-    for (p = t->wagon->next; p != t->sentinel; p = p->next)
+    TList p = t->wagon->next;
+    while (p != t->sentinel)
     {
-        free(p->prev);
+        TList next = p->next;
+        free(p);
+        p = next;
     }
     t->wagon->next = t->sentinel;
     t->mechanic = t->wagon;
     t->wagon->character = '#';
-    p = NULL;
-    free(p);
 }
 
 //functie pentru inserarea unui vagon la dreapta
@@ -163,6 +164,7 @@ void insertRight(List *t, char c)
         if (new_wagon == NULL)
         {
             printf("Malloc Failed!\n");
+            free(new_wagon);
             return;
         }
         t->mechanic->next = new_wagon;
@@ -179,6 +181,7 @@ void insertRight(List *t, char c)
         if (new_wagon == NULL)
         {
             printf("Malloc Failed!\n");
+            free(new_wagon);
             return;
         }
         new_wagon->next = t->mechanic->next;
@@ -220,8 +223,8 @@ void insertLeft(List *t, char c, FILE *out)
 //functie pentru cautarea unui cuvant in tot trenul
 void search(List *t, char word[], FILE *out)
 {
-    char aux[101], s[101], *cmp;
-    int k = 1, ok = 0, i, found = 0;
+    char aux[101] = "", s[101] = "", *cmp = NULL;
+    int k = 1, ok = 0, i = 0, found = 0;
     aux[0] = t->mechanic->character;
     //primul caracter e cel din cuvant
     if (aux[0] == word[0])
@@ -320,7 +323,7 @@ void search(List *t, char word[], FILE *out)
 //functie pentru cautarea unui cuvant in dreapta
 void searchRight(List *t, char word[], FILE *out)
 {
-    char aux[101], s[101], *cmp;
+    char aux[101] = "", s[101] = "", *cmp = NULL;
     int k = 1, ok = 0, i, found = 0;
     aux[0] = t->mechanic->character;
     if (aux[0] == word[0])
@@ -396,7 +399,7 @@ void searchRight(List *t, char word[], FILE *out)
 //functie pentru cautarea unui cuvant in stanga
 void searchLeft(List *t, char word[], FILE *out)
 {
-    char aux[101], s[101], *cmp;
+    char aux[101] = "", s[101] = "", *cmp = NULL;
     int k = 1, ok = 0, i, found = 0;
     aux[0] = t->mechanic->character;
     if (aux[0] == word[0])
