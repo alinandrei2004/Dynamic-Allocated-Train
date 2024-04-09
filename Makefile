@@ -5,4 +5,4 @@ run:
 clean:
 	rm -f tema1
 pack:
-	zip -FSr 312CC_Abăhnencei_Alin_Andrei.zip README.md Makefile tema1.c
+	zip -FSr 312CC_Abăhnencei_Alin_Andrei.zip README Makefile tema1.c
