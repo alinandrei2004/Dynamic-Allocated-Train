@@ -1,3 +1,75 @@
-# Punctaj acordat
-## Puncte pe teste: 100/100
-## Puncte pe valgrind: 15/20
+Tema realizata de ABĂHNENCEI Alin Andrei - 312CC
+
+-------------------------------------------------------------------------------
+
+Punctaj obținut:
+
+    * Total: 100/100
+    * Valgrind: 15/20
+
+-------------------------------------------------------------------------------
+
+Implementare:
+
+    În rezolvarea temei, am utilizat 4 structuri pentru a reține datele necesa-
+re: nod de tip vagon, nod din coadă, tren și coadă. Am creat 2 funcții pentru
+inițializarea trenului si a cozii.
+    Implementarea funcțiilor de tip "Update":
+* void moveLeft(List *t); -> deplasează mecanicul cu o poziție la stânga, iar
+    dacă acesta se află pe primul vagon, va ajunge în ultimul.
+* void moveRight(List *t); -> deplasează mecanicul cu o poziție la dreapta, iar
+    dacă acesta se află pe ultimul vagon, va ajunge în primul.
+* void write(List *t, char c); -> schimbă inscripția vagonului cu noul caracter
+    dat ca parametru.
+* void clearCell(List *t); -> elimină vagonul în care se află mecanicul și de-
+    plasează mecanicul cu o poziție la stânga. Dacă mecanicul se află în pri-
+    mul vagon, va fi mutat în ultimul.
+* void clearAll(List *t); -> elimină toate vagoanele din tren, în afară de pri-
+    mul, căruia îi schimbă inscripția in '#'.
+* void insertRight(List *t, char c); -> inserează un nou vagon la dreapta meca-
+    nicului și îl inscripționează cu un caracter dat ca parametru. Dacă acesta
+    se află pe ultimul vagon, se va adăuga un vagon nou la finalul trenului.
+* void insertLeft(List *t, char c); -> inserează un nou vagon la stânga mecani-
+    cului dacă acesta nu se află pe prima poziție și îl inscripționează cu un
+    caracter dat ca parametru. Dacă se află pe prima poziție se afișează un
+    mesaj de eroare.
+
+    Implementarea funcțiilor de tip "Search":
+* void search(List *t, char word[], FILE *out); -> se caută șirul "word" circu-
+    lar spre dreapta, fiecare vagon fiind parcurs o singură dată. Fiecare ca-
+    racter este adăugat într-un șir auxiliar atât timp cât coincide cu litera
+    de pe aceeași poziție din cuvântul căutat. În caz contrar, se caută cel mai
+    lung sufix din "aux" care se găsește în cuvântul căutat. Dacă acesta este
+    găsit, mecanicul este mutat pe poziția primei litere din șir, altfel se va
+    afișa un mesaj de eroare.
+* void searchRight(List *t, char word[], FILE *out); -> se caută șirul "word"
+    spre dreapta până la întâlnirea santinelei. Se caută sufixul ca în funcția
+    "search". Dacă nu este găsit șirul, se afișează "ERROR".
+* void searchLeft(List *t, char word[], FILE *out); -> se caută șirul "word"
+    spre stânga până la întâlnirea santinelei. Se caută sufixul ca în funcția
+    "search". Dacă nu este găsit șirul, se afișează "ERROR".
+
+    Implementarea funcțiilor de tip "Query":
+* void show_current(List t, FILE *out); -> Afișează caracterul de pe vagonul în
+    care se află mecanicul.
+* void show(List t, FILE *out); -> Afișează tot conținutul trenului, poziția
+    mecanicului fiind evidențiată.
+* void switchQueue(Queue *q); -> inversează ordinea de parcurgere a cozii,
+    interschimbând pointerii *next si *prev la întâlnirea unei comenzi de tip
+    "EXECUTE".
+
+    Operația "EXECUTE" determină apelarea funcțiilor de tip "Update" și
+"Search" care sunt stocate într-o coadă.
+
+    De asemenea, am implementat funcții pentru:
+* adăugare în coadă -> void push(Queue *q, char s[]);
+* eliminare din coadă -> void pop(Queue *q, List *train, FILE *out);
+* eliberare memorie -> void freeMemory(List *t, Queue *q);
+
+    În funția "main" am inițializat trenul și coada, am citit și afișat datele
+folosind fișiere și am eliberat memoria alocată. La citire, am eliminat carac-
+terul '\n' din structura instrucțiunii, dacă exista. În funcție de instrucțiuni,
+am adăgat / scos din coadă, am afișat caracterul de pe vagonul în care se află
+mecanicul / tot conținutul trenului și am inversat coada. În final, am închis
+fișierele cu care am lucrat.
+

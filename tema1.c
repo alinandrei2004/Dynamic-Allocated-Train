@@ -1,3 +1,5 @@
+// ABĂHNENCEI Alin Andrei - 312CC
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -147,6 +149,8 @@ void clearAll(List *t)
     t->wagon->next = t->sentinel;
     t->mechanic = t->wagon;
     t->wagon->character = '#';
+    p = NULL;
+    free(p);
 }
 
 //functie pentru inserarea unui vagon la dreapta
@@ -161,12 +165,12 @@ void insertRight(List *t, char c)
             printf("Malloc Failed!\n");
             return;
         }
-        new_wagon->character = c;
         t->mechanic->next = new_wagon;
         new_wagon->prev = t->mechanic;
         new_wagon->next = t->sentinel;
         t->sentinel->prev = new_wagon;
         t->mechanic = new_wagon;
+        new_wagon->character = c;
     }
     //mecanicul e pe alta pozitie
     else
@@ -177,12 +181,12 @@ void insertRight(List *t, char c)
             printf("Malloc Failed!\n");
             return;
         }
-        new_wagon->character = c;
         new_wagon->next = t->mechanic->next;
         new_wagon->prev = t->mechanic;
         t->mechanic->next->prev = new_wagon;
         t->mechanic->next = new_wagon;
         t->mechanic = t->mechanic->next;
+        new_wagon->character = c;
     }
 }
 
@@ -216,7 +220,7 @@ void insertLeft(List *t, char c, FILE *out)
 //functie pentru cautarea unui cuvant in tot trenul
 void search(List *t, char word[], FILE *out)
 {
-    char aux[100], s[100];
+    char aux[101], s[101], *cmp;
     int k = 1, ok = 0, i, found = 0;
     aux[0] = t->mechanic->character;
     //primul caracter e cel din cuvant
@@ -262,12 +266,15 @@ void search(List *t, char word[], FILE *out)
             ok = 0;
             for (i = 0; i < k && ok == 0; i++)
             {
-                if (strstr(word, aux + i) != NULL)
+                cmp = strstr(word, aux + i);
+                if (cmp != NULL)
                 {
-                    if (strcmp(strstr(word, aux + i), word) == 0)
+                    if (strcmp(cmp, word) == 0)
                     {
                         ok = 1;
-                        if (strlen(aux) >= i)
+                        //strlen returneaza date de tip size_t, asa ca se face
+                        //cast
+                        if (strlen(aux) >= (size_t)i)
                         {
                             strcpy(s, aux + i);
                             strcpy(aux, s);
@@ -304,12 +311,16 @@ void search(List *t, char word[], FILE *out)
     {
         fprintf(out, "ERROR\n");
     }
+    p = NULL;
+    free(p);
+    cmp = NULL;
+    free(cmp);
 }
 
 //functie pentru cautarea unui cuvant in dreapta
 void searchRight(List *t, char word[], FILE *out)
 {
-    char aux[50], s[50];
+    char aux[101], s[101], *cmp;
     int k = 1, ok = 0, i, found = 0;
     aux[0] = t->mechanic->character;
     if (aux[0] == word[0])
@@ -341,12 +352,13 @@ void searchRight(List *t, char word[], FILE *out)
             ok = 0;
             for (i = 0; i < k && ok == 0; i++)
             {
-                if (strstr(word, aux + i) != NULL)
+                cmp = strstr(word, aux + i);
+                if (cmp != NULL)
                 {
-                    if (strcmp(strstr(word, aux + i), word) == 0)
+                    if (strcmp(cmp, word) == 0)
                     {
                         ok = 1;
-                        if (strlen(aux) >= i)
+                        if (strlen(aux) >= (size_t)i)
                         {
                             strcpy(s, aux + i);
                             strcpy(aux, s);
@@ -375,12 +387,16 @@ void searchRight(List *t, char word[], FILE *out)
     {
         fprintf(out, "ERROR\n");
     }
+    p = NULL;
+    free(p);
+    cmp = NULL;
+    free(cmp);
 }
 
 //functie pentru cautarea unui cuvant in stanga
 void searchLeft(List *t, char word[], FILE *out)
 {
-    char aux[50], s[50];
+    char aux[101], s[101], *cmp;
     int k = 1, ok = 0, i, found = 0;
     aux[0] = t->mechanic->character;
     if (aux[0] == word[0])
@@ -412,12 +428,13 @@ void searchLeft(List *t, char word[], FILE *out)
             ok = 0;
             for (i = 0; i < k && ok == 0; i++)
             {
-                if (strstr(word, aux + i) != NULL)
+                cmp = strstr(word, aux + i);
+                if (cmp != NULL)
                 {
-                    if (strcmp(strstr(word, aux + i), word) == 0)
+                    if (strcmp(cmp, word) == 0)
                     {
                         ok = 1;
-                        if (strlen(aux) >= i)
+                        if (strlen(aux) >= (size_t)i)
                         {
                             strcpy(s, aux + i);
                             strcpy(aux, s);
@@ -446,6 +463,10 @@ void searchLeft(List *t, char word[], FILE *out)
     {
         fprintf(out, "ERROR\n");
     }
+    p = NULL;
+    free(p);
+    cmp = NULL;
+    free(cmp);
 }
 
 //functie pentru interschimbarea elementelor cozii
@@ -464,6 +485,8 @@ void switchQueue(Queue *q)
         aux->next = aux->prev;
         aux->prev = aux2;
     }
+    aux = NULL;
+    free(aux);
 }
 
 //functie pentru adaugarea unui element in coada
@@ -563,6 +586,8 @@ void show(List t, FILE *out)
         }
     }
     fprintf(out, "\n");
+    p = NULL;
+    free(p);
 }
 
 //functie pentru eliberarea memoriei
@@ -577,6 +602,7 @@ void freeMemory(List *t, Queue *q)
         free(temp);
     }
     free(t->sentinel);
+
     //eliberarea memoriei pentru coada
     QNode *currentQ = q->first->next;
     while (currentQ != q->last)
