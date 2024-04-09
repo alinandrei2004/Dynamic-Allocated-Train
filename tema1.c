@@ -2,28 +2,35 @@
 #include <stdlib.h>
 #include <string.h>
 
+//structura pentru vagon
 typedef struct node
 {
     char character;
     struct node *next, *prev;
 } Node, *TList;
 
+//structura pentru tren
 typedef struct
 {
     TList sentinel, wagon, mechanic;
 } List;
 
+//structura pentru un element din coada
 typedef struct queueNode
 {
     char ins[101];
     struct queueNode *next, *prev;
 } QNode;
 
+
+//structura pentru coada
 typedef struct queue
 {
     QNode *first, *last;
 } Queue;
 
+
+//initializarea trenului
 void initTrain(List *t)
 {
     t->sentinel = (TList)malloc(sizeof(Node));
@@ -38,10 +45,10 @@ void initTrain(List *t)
     t->wagon->next = t->sentinel;
     t->wagon->prev = t->sentinel;
     t->mechanic = t->wagon;
-    // t->mechanic->character = '#';
     t->wagon->character = '#';
 }
 
+//initializarea cozii
 void initQueue(Queue *q)
 {
     q->first = (QNode *)malloc(sizeof(QNode));
@@ -57,11 +64,13 @@ void initQueue(Queue *q)
     q->last->prev = q->first;
 }
 
+//functie pentru modificarea inscriptiei de pe vagon
 void write(List *t, char c)
 {
     t->mechanic->character = c;
 }
 
+//functie pentru deplasarea mecanicului la dreapta
 void moveRight(List *t)
 {
     if (t->mechanic->next == t->sentinel)
@@ -85,6 +94,7 @@ void moveRight(List *t)
     }
 }
 
+//functie pentru deplasarea mecanicului la stanga
 void moveLeft(List *t)
 {
     if (t->mechanic->prev == t->sentinel)
@@ -97,12 +107,15 @@ void moveLeft(List *t)
     }
 }
 
+//functie pentru stergerea unui vagon
 void clearCell(List *t)
 {
+    //daca e un singur vagon in tren
     if (t->mechanic->prev == t->sentinel && t->mechanic->next == t->sentinel)
     {
         t->mechanic->character = '#';
     }
+    //daca mecanicul e pe primul vagon
     else if (t->mechanic == t->wagon && t->mechanic->next != t->sentinel)
     {
         TList aux = t->mechanic;
@@ -112,6 +125,7 @@ void clearCell(List *t)
         t->wagon = t->sentinel->next;
         free(aux);
     }
+    //daca mecanicul e pe alta pozitie
     else
     {
         TList aux = t->mechanic;
@@ -122,6 +136,7 @@ void clearCell(List *t)
     }
 }
 
+//functie pentru stergerea tuturor vagoanelor
 void clearAll(List *t)
 {
     TList p;
@@ -134,26 +149,35 @@ void clearAll(List *t)
     t->wagon->character = '#';
 }
 
+//functie pentru inserarea unui vagon la dreapta
 void insertRight(List *t, char c)
 {
-    TList new_wagon = (TList)malloc(sizeof(Node));
-    if (new_wagon == NULL)
-    {
-        printf("Malloc Failed!\n");
-        return;
-    }
-    new_wagon->character = c;
+    //mecanicul e pe ultimul vagon
     if (t->mechanic == t->sentinel->prev)
     {
+        TList new_wagon = (TList)malloc(sizeof(Node));
+        if (new_wagon == NULL)
+        {
+            printf("Malloc Failed!\n");
+            return;
+        }
+        new_wagon->character = c;
         t->mechanic->next = new_wagon;
         new_wagon->prev = t->mechanic;
         new_wagon->next = t->sentinel;
         t->sentinel->prev = new_wagon;
         t->mechanic = new_wagon;
-        return;
     }
+    //mecanicul e pe alta pozitie
     else
     {
+        TList new_wagon = (TList)malloc(sizeof(Node));
+        if (new_wagon == NULL)
+        {
+            printf("Malloc Failed!\n");
+            return;
+        }
+        new_wagon->character = c;
         new_wagon->next = t->mechanic->next;
         new_wagon->prev = t->mechanic;
         t->mechanic->next->prev = new_wagon;
@@ -162,6 +186,7 @@ void insertRight(List *t, char c)
     }
 }
 
+//functie pentru inserarea unui vagon la stanga
 void insertLeft(List *t, char c, FILE *out)
 {
     TList new_wagon = (TList)malloc(sizeof(Node));
@@ -170,12 +195,14 @@ void insertLeft(List *t, char c, FILE *out)
         printf("Malloc Failed!\n");
         return;
     }
+    //mecanicul e pe primul vagon
     new_wagon->character = c;
     if (t->mechanic == t->wagon)
     {
         fprintf(out, "ERROR\n");
         free(new_wagon);
     }
+    //mecanicul e pe alta pozitie
     else
     {
         new_wagon->next = t->mechanic;
@@ -186,20 +213,24 @@ void insertLeft(List *t, char c, FILE *out)
     }
 }
 
+//functie pentru cautarea unui cuvant in tot trenul
 void search(List *t, char word[], FILE *out)
 {
     char aux[100], s[100];
     int k = 1, ok = 0, i, found = 0;
     aux[0] = t->mechanic->character;
+    //primul caracter e cel din cuvant
     if (aux[0] == word[0])
     {
         ok = 1;
         aux[1] = '\0';
     }
+    //daca a fost gasit cuvantul
     else if (strcmp(aux, word) == 0)
     {
         found = 1;
     }
+    //daca nu a fost gasit cuvantul se reinitializeaza aux
     else if (ok == 0)
     {
         k = 0;
@@ -208,9 +239,11 @@ void search(List *t, char word[], FILE *out)
     TList p;
     for (p = t->mechanic->next; p != t->mechanic && found == 0; p = p->next)
     {
+        //daca s-a ajuns la locomoitva se sare peste ea
         if (p == t->sentinel)
         {
             p = t->wagon;
+            //daca s-a ajuns de unde a plecat se iese din for
             if (p == t->mechanic)
             {
                 break;
@@ -222,6 +255,8 @@ void search(List *t, char word[], FILE *out)
         {
             found = 1;
         }
+        //daca ultimul caracter din aux e diferit de caracterul corespunzator
+        //din cuvant se incearca sa se gaseasca un sufix al cuvantului in aux
         else if (aux[k - 1] != word[k - 1])
         {
             ok = 0;
@@ -252,6 +287,7 @@ void search(List *t, char word[], FILE *out)
             }
         }
     }
+    //daca cuvantul a fost gasit se muta mecanicul pe primul caracter
     if (found)
     {
         for (i = 0; i < k; i++)
@@ -270,6 +306,7 @@ void search(List *t, char word[], FILE *out)
     }
 }
 
+//functie pentru cautarea unui cuvant in dreapta
 void searchRight(List *t, char word[], FILE *out)
 {
     char aux[50], s[50];
@@ -297,6 +334,8 @@ void searchRight(List *t, char word[], FILE *out)
         {
             found = 1;
         }
+        //daca ultimul caracter din aux e diferit de caracterul corespunzator
+        //din cuvant se incearca sa se gaseasca un sufix al cuvantului in aux
         else if (aux[k - 1] != word[k - 1])
         {
             ok = 0;
@@ -327,6 +366,7 @@ void searchRight(List *t, char word[], FILE *out)
             }
         }
     }
+    //daca cuvantul a fost gasit se muta mecanicul pe ultimul caracter
     if (found)
     {
         t->mechanic = p->prev;
@@ -337,6 +377,7 @@ void searchRight(List *t, char word[], FILE *out)
     }
 }
 
+//functie pentru cautarea unui cuvant in stanga
 void searchLeft(List *t, char word[], FILE *out)
 {
     char aux[50], s[50];
@@ -364,6 +405,8 @@ void searchLeft(List *t, char word[], FILE *out)
         {
             found = 1;
         }
+        //daca ultimul caracter din aux e diferit de caracterul corespunzator
+        //din cuvant se incearca sa se gaseasca un sufix al cuvantului in aux
         else if (aux[k - 1] != word[k - 1])
         {
             ok = 0;
@@ -394,6 +437,7 @@ void searchLeft(List *t, char word[], FILE *out)
             }
         }
     }
+    //daca cuvantul a fost gasit se muta mecanicul pe ultimul caracter
     if (found)
     {
         t->mechanic = p->next;
@@ -404,6 +448,7 @@ void searchLeft(List *t, char word[], FILE *out)
     }
 }
 
+//functie pentru interschimbarea elementelor cozii
 void switchQueue(Queue *q)
 {
     QNode *aux = q->first;
@@ -421,6 +466,7 @@ void switchQueue(Queue *q)
     }
 }
 
+//functie pentru adaugarea unui element in coada
 void push(Queue *q, char s[])
 {
     QNode *new_instr = (QNode *)malloc(sizeof(QNode));
@@ -436,6 +482,7 @@ void push(Queue *q, char s[])
     new_instr->next = q->last;
 }
 
+//functie pentru eliminarea unui element din coada
 void pop(Queue *q, List *train, FILE *out)
 {
     char c, word[101];
@@ -491,12 +538,14 @@ void pop(Queue *q, List *train, FILE *out)
     free(aux);
 }
 
+//functie pentru afisarea caracterului de pe vagonul pe care se afla mecanicul
 void show_current(List t, FILE *out)
 {
     fprintf(out, "%c", t.mechanic->character);
     fprintf(out, "\n");
 }
 
+//functie pentru afisarea trenului
 void show(List t, FILE *out)
 {
     TList p;
@@ -516,8 +565,10 @@ void show(List t, FILE *out)
     fprintf(out, "\n");
 }
 
+//functie pentru eliberarea memoriei
 void freeMemory(List *t, Queue *q)
 {
+    //eliberarea memoriei pentru tren
     TList current = t->sentinel->next;
     while (current != t->sentinel)
     {
@@ -526,6 +577,7 @@ void freeMemory(List *t, Queue *q)
         free(temp);
     }
     free(t->sentinel);
+    //eliberarea memoriei pentru coada
     QNode *currentQ = q->first->next;
     while (currentQ != q->last)
     {
@@ -551,6 +603,7 @@ int main()
         printf("Cannot open file!\n");
         return 0;
     }
+    //initializarea trenului si a cozii
     initTrain(&train);
     initQueue(&q);
     fscanf(f, "%d", &nr_instr);
@@ -558,17 +611,17 @@ int main()
     for (i = 0; i < nr_instr; i++)
     {
         fgets(instr, 101, f);
+        //eliminarea caracterului '\n' de la finalul instructiunii
         if (instr[strlen(instr) - 1] == '\n')
         {
             instr[strlen(instr) - 1] = '\0';
         }
-        // if(i >= 50) printf("%s\n", instr);
+        //adaugare in coada
         if (strstr(instr, "MOVE") || strstr(instr, "WRITE") ||
             strstr(instr, "CLEAR") || strstr(instr, "INSERT") ||
             strstr(instr, "SEARCH"))
         {
             push(&q, instr);
-            // printf("%s", q.first->next->ins);
         }
         else if (strcmp(instr, "SHOW") == 0)
         {
@@ -577,7 +630,6 @@ int main()
         else if (strcmp(instr, "SHOW_CURRENT") == 0)
         {
             show_current(train, out);
-            // printf("%c", train.wagon->character);
         }
         else if (strstr(instr, "EXECUTE"))
         {
@@ -587,9 +639,8 @@ int main()
         {
             switchQueue(&q);
         }
-        // show(train, out);
     }
-    // moveRight(&train);
+    //eliberarea memoriei si inchiderea fisierelor
     freeMemory(&train, &q);
     fclose(f);
     fclose(out);
